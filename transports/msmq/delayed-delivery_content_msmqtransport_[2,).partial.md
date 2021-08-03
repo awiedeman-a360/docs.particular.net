@@ -1,21 +1,28 @@
-Because MSMQ lacks a mechanism for sending delayed messages, the MSMQ transport uses an external store for delayed messages. Messages that are meant to be delivered later (e.g. [saga timeouts](/nservicebus/sagas/timeouts.md) or [delayed retries](/nservicebus/recoverability/configure-delayed-retries.md)) are persisted in the delayed message store until these are due. At that point the due messages are fetched from the store and dispatched to their ultimate destinations.
+Because MSMQ lacks a mechanism for sending delayed messages, the MSMQ transport uses an external store for delayed messages. Messages that are to be delivered later (e.g. [saga timeouts](/nservicebus/sagas/timeouts.md) or [delayed retries](/nservicebus/recoverability/configure-delayed-retries.md)) are persisted in the delayed message store until they are due. When a message is due, it is retreived from the store and dispatched to its destination.
 
-To configure the MSMQ transport to enable delayed message delivery use the following API:
+The MSMQ transport requires explicit configuration to enable delayed message delivery. For example:
 
 snippet: delayed-delivery
 
-The code above sets up a SQL Server delayed message store. The SQL Server store is the only store that ships with the MSMQ transport. By default the SQL Server store uses a table named after then endpoint with `.delayed` suffix but that table name can be customized. 
+The SQL Server delayed message store (`SqlServerDelayedMessageStore`) is the only delayed message store that ships with the MSMQ transport.
 
+### How it works
 
-## How to provide a custom delayed message store
+A delayed message store implements the `IDelayedMessageStore` interface. Delayed message delivery has two parts:
 
-A custom delayed message store can be provided by implementing the `IDelayedMessageStore` interface. 
+### Storing of delayed messages
 
-This interface  The delayed delivery handling mechanism has two parts. First, a delayed message is stored using the `Store` method. 
+A delayed message is stored using the `Store` method.
 
-The second part is polling the message store for due delayed messages. Polling is accomplished by periodically calling `FetchNextDueTimeout`. As long due messages are returned, the polling mechanism continues to pull more messages. If there are no more due messages, `Next` is invoked to determine how much time is left until the next due timeout. The polling mechanism pauses until that time. If another delayed message is persisted in the meantime, the `Store` method wakes up the polling thread.
+### Polling and dispatching of delayed messages
 
-When a due delayed message is returned by `FetchNextDueTimeout`, the message is forwarded to the destination and then removed from the store using the `Remove` method. In case of an unexpected exception during forwarding the failure is registered using `IncrementFailureCount`. If the configured number of retries is exhausted the message is forwarded to the configured `error` queue.
+The message store is polled for due delayed messages in a background task which periodically calls `FetchNextDueTimeout`. If the method returns a message, the message is sent (see next paragraph), and the method is immediately called again. If the method returns `null`, `Next` is called, which returns either a `DateTimeOffset` indicating when next message will be due, or `null` if there are no delayed messages. `FetchNextDueTimeout` will be called. If another delayed message is persisted in the meantime, using the `Store` method.
+
+When a due delayed message is returned by `FetchNextDueTimeout`, the message is sent to the destination and then removed from the store using the `Remove` method. In case of an unexpected exception during forwarding the failure is registered using `IncrementFailureCount`. If the configured number of retries is exhausted the message is forwarded to the configured `error` queue.
+
+## Using a custom delayed message store
+
+Implement the `IDelayedMessageStore` interface and pass
 
 ### Consistency
 
