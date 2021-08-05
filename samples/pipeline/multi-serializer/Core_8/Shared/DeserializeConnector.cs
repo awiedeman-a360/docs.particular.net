@@ -57,7 +57,7 @@ class DeserializeConnector :
 
     List<LogicalMessage> Extract(IncomingMessage physicalMessage)
     {
-        if (physicalMessage.Body == null || physicalMessage.Body.Length == 0)
+        if (physicalMessage.Body.IsEmpty)
         {
             return new List<LogicalMessage>();
         }
@@ -87,16 +87,14 @@ class DeserializeConnector :
             }
         }
 
-        using (var stream = new MemoryStream(physicalMessage.Body))
-        {
-            var messageSerializer = serializationMapper.GetSerializer(headers);
-            var typesToDeserialize = messageMetadata
-                .Select(metadata => metadata.MessageType)
-                .ToList();
-            return messageSerializer.Deserialize(stream, typesToDeserialize)
-                .Select(x => logicalMessageFactory.Create(x.GetType(), x))
-                .ToList();
-        }
+        var messageSerializer = serializationMapper.GetSerializer(headers);
+        var typesToDeserialize = messageMetadata
+            .Select(metadata => metadata.MessageType)
+            .ToList();
+
+        return messageSerializer.Deserialize(physicalMessage.Body, typesToDeserialize)
+            .Select(x => logicalMessageFactory.Create(x.GetType(), x))
+            .ToList();
     }
 }
 
