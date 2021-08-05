@@ -10,7 +10,7 @@ class Program
 
         var endpointConfiguration = new EndpointConfiguration("Samples.Pipeline.SigningAndEncryption.ReceivingEndpoint");
         endpointConfiguration.UsePersistence<LearningPersistence>();
-        endpointConfiguration.UseTransport<LearningTransport>();
+        endpointConfiguration.UseTransport(new LearningTransport());
 
         endpointConfiguration.RegisterSigningBehaviors();
 

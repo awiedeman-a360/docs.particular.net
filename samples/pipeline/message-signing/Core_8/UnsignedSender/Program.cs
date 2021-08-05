@@ -11,8 +11,8 @@ class Program
         var endpointConfiguration = new EndpointConfiguration("Samples.Pipeline.SigningAndEncryption.UnsignedSender");
         endpointConfiguration.UsePersistence<LearningPersistence>();
 
-        var transport = endpointConfiguration.UseTransport<LearningTransport>();
-        var routing = transport.Routing();
+        var transport = new LearningTransport();
+        var routing = endpointConfiguration.UseTransport(transport);
         routing.RouteToEndpoint(typeof(MyMessage), "Samples.Pipeline.SigningAndEncryption.ReceivingEndpoint");
 
         // This endpoint does not sign messages.
