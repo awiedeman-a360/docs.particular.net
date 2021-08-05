@@ -13,7 +13,7 @@ class Program
         Console.Title = "Samples.MultiSerializer.Sender";
         var endpointConfiguration = new EndpointConfiguration("Samples.MultiSerializer.Sender");
         endpointConfiguration.UsePersistence<LearningPersistence>();
-        endpointConfiguration.UseTransport<LearningTransport>();
+        endpointConfiguration.UseTransport(new LearningTransport());
 
         var endpointInstance = await Endpoint.Start(endpointConfiguration)
             .ConfigureAwait(false);

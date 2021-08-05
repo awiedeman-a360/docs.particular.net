@@ -6,6 +6,6 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.*" />
     <PackageReference Include="NServiceBus" Version="8.0.0-PullRequest6111.1037" />
-    <PackageReference Include="NServiceBus.Newtonsoft.Json" Version="2.*" />
+    <PackageReference Include="NServiceBus.Newtonsoft.Json" Version="3.0.0-PullRequest0168.177" />
   </ItemGroup>
 </Project>

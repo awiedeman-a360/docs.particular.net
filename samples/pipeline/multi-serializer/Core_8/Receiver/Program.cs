@@ -13,7 +13,7 @@ class Program
         Console.Title = "Samples.MultiSerializer.Receiver";
         var endpointConfiguration = new EndpointConfiguration("Samples.MultiSerializer.Receiver");
         endpointConfiguration.UsePersistence<LearningPersistence>();
-        endpointConfiguration.UseTransport<LearningTransport>();
+        endpointConfiguration.UseTransport(new LearningTransport());
         var endpointInstance = await Endpoint.Start(endpointConfiguration)
             .ConfigureAwait(false);
         Console.WriteLine("Press any key to exit");
