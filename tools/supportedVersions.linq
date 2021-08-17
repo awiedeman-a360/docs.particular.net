@@ -437,7 +437,7 @@ static IEnumerable<SerializationComponent> GetComponents(string path, string cor
 	}
 
 	return components
-		.Where(component => component.UsesNuget && component.SupportLevel == SupportLevel.Regular);
+		.Where(component => component.UsesNuget && component.SupportLevel == SupportLevel.Regular && component.Category != ComponentCategory.Tool);
 }
 
 public class NuGetSearcher
@@ -557,6 +557,7 @@ public enum ComponentCategory
 	Databus,
 	Host,
 	Other,
+	Tool,
 }
 
 public class Logger : ILogger
